@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         ds_group = QGroupBox(self.tr("Dataset"))
 
         self.ds_label = QLabel()
-        self.ds_label.setText("Sample: 000000.png")
+        self.ds_label.setText("Sample: 000000.jpg")
 
         ds_vlay = QVBoxLayout(ds_group)
         ds_vlay.addWidget(self.ds_label)
@@ -180,12 +180,12 @@ class MainWindow(QMainWindow):
         self._graphics_view.set_brush_color(QColor(color))
 
     def save_current_label(self):
-        curr_label_path = self._label_dir / f"{self._image_stems[self._curr_id]}.png"
+        curr_label_path = self._label_dir / f"{self._image_stems[self._curr_id]}.jpg"
         self._graphics_view.save_label_to(curr_label_path)
 
     def _load_sample_by_id(self, id: int):
         self._curr_id = id
-        name = f"{self._image_stems[self._curr_id]}.png"
+        name = f"{self._image_stems[self._curr_id]}.jpg"
         image_path = self._image_dir / name
         label_path = self._label_dir / name
         sam_path = self._sam_dir / name
