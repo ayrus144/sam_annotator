@@ -99,7 +99,7 @@ where:
 - `name` field is arbitrary and used only for dispaly in GUI
 - `color` field specifies the color this class would be displayed in GUI and encoded in output label `.png`
 
-**Note:** specify path to your `my_dataset` (or any other name) inside `config.toml`.
+**Note:** specify path to your `data` inside `config.toml`.
 
 **Note:** image files can have arbitrary names, but should resemble labels and sam names + only `.png` format is supported.
 
