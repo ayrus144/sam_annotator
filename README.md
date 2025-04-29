@@ -11,21 +11,52 @@ Animation below shows annotation speed in real-time (SAM mask used).
 
 ## Workflow
 
-- (optional) Generate SAM masks from images via given script
-- Organize your data following [this](#dataset-folder-structure) structure
-- Specify path to your data in `config.toml`
-- Run GUI via `__main__.py` ([prerequisites](#prerequisites) should be satisfied)
-- Annotate using brush (label is saved on sample switch)
+After environment setup:
+- Organize your data following [this](#dataset-folder-structure) structure. Don't forget to copy/create/edit `classes.json`.
+- (optional) Generate SAM masks from images via `scripts/preprocess_dataset.py`. Necessary for `SAM assistance` option.
+```bash 
+python scripts/preprocess_dataset.py
+```
+- Specify path to your data in `config.toml`.
+- Run GUI via `__main__.py` ([prerequisites](#prerequisites) should be satisfied).
+```bash 
+python __main__.py
+```
+- Annotate using brush (and/or) SAM assistance (label is saved on sample switch).
+- See **Shortcuts** section for brush and panel controls (ex. changing image sample etc.)
 
 ## Getting started
 
-### Prerequisites
+### Prerequisites: Environment setup and SAM Model
 
 Annotation tool itself requires only:
 
 - `Python 3.11`
 - `PyQt5`
 - `numpy`
+
+(optional) In order to generate SAM masks for Magic Wand, you will need to install:
+
+- `PyTorch` to run SAM model inference
+- `segment-anything` itself + related libs
+- Download `ViT-H` SAM model from https://github.com/facebookresearch/segment-anything and place the subsequent `sam_vit_h_4b8939.pth` file in `assets` folder.
+
+(Hint) Setting up conda environment with `requirements.txt` should cover the prerequisites. But downloading `ViT-H` model should still be done manually.
+
+Example setup (assuming Miniconda/Anaconda installed):
+
+```bash
+conda create -n samat python=3.11
+conda activate samat
+
+## Environment setup with requirements.txt
+pip install -r requirements.txt
+
+## Or, Manual environment setup
+## conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+## pip install git+https://github.com/facebookresearch/segment-anything.git
+## pip install opencv-python pycocotools matplotlib onnxruntime onnx
+```
 
 Example setup (Ubuntu):
 
@@ -41,46 +72,36 @@ python -m pip install -e .
 python .
 ```
 
-(optional) In order to generate SAM masks for Magic Wand, you will need to install:
-
-- `PyTorch` to run SAM model inference
-- `segment-anything` itself + related libs
-
-Example setup (assuming Miniconda/Anaconda installed):
-
-```bash
-conda create -n samat python=3.11
-conda activate samat
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-pip install git+https://github.com/facebookresearch/segment-anything.git
-pip install opencv-python pycocotools matplotlib onnxruntime onnx
-```
 
 ### Dataset folder structure
 
 Your data **MUST** follow this structure:
-
 ```
 ── my_dataset
    ├── images
-   |   ├── 000001.png
-   |   ├── 000002.png
+   |   ├── 000001.jpg
+   |   ├── 000002.jpg
    |   └── ...
    ├── labels (optional)
-   |   ├── 000001.png
-   |   ├── 000002.png
+   |   ├── 000001.jpg
+   |   ├── 000002.jpg
    |   └── ...
    ├── sam (optional)
-   |   ├── 000001.png
-   |   ├── 000002.png
+   |   ├── 000001.jpg
+   |   ├── 000002.jpg
    |   └── ...
    └── classes.json
 ```
 
-- `images` contains `.png` files you want to label
-- `labels` contains `.png` files with labels (will be automatically created if you have no labels yet)
-- `sam` contains `.png` files with SAM annotations (8-bit grayscale product of SAM script from `scripts/` folder)
-- `classes.json` contains classes description that will be used for labeling
+- `images` contains `.jpg` files you want to label.
+- `labels` contains `.jpg` files with labels (will be automatically created if you have no labels yet).
+- `sam` contains `.jpg` files with SAM annotations (8-bit grayscale product of SAM script from `scripts/` folder).
+- `classes.json` contains classes description that will be used for labeling.
+
+
+**Hints & Best Practice**: 
+- To maintain similarity among multiple sessions, save a common `classes.json` at `example_dataset` folder and copy it to your required dataset.
+- While creating `classes.json` file, be sure to create independent class labels, especially its corresponding color in hexadecimal.
 
 Example `classes.json`:
 
@@ -95,13 +116,13 @@ Example `classes.json`:
 
 where:
 
-- `id` field must coinside with number keys on keyboard, so start with 1 (not 0). Any number of classes allowed, but only first 9 have their shortcuts.
+- `id` field must coincide with number keys on keyboard, so start with 1 (not 0). Any number of classes allowed, but only first 9 have their shortcuts.
 - `name` field is arbitrary and used only for dispaly in GUI
-- `color` field specifies the color this class would be displayed in GUI and encoded in output label `.png`
+- `color` field specifies the color this class would be displayed in GUI and encoded in output label `.jpg`
 
-**Note:** specify path to your `data` inside `config.toml`.
-
-**Note:** image files can have arbitrary names, but should resemble labels and sam names + only `.png` format is supported.
+**Note:** 
+- Specify path to your `data` inside `config.toml`.
+- Image files can have arbitrary names, but should resemble labels and sam names + only `.jpg` format is supported.
 
 ## Shortcuts
 
