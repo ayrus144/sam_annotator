@@ -101,7 +101,7 @@ where:
 
 **Note:** specify path to your `my_dataset` (or any other name) inside `config.toml`.
 
-**Note:** image files can have arbitrary names, but should resemble labels and sam names + only `.png` format is suppotred.
+**Note:** image files can have arbitrary names, but should resemble labels and sam names + only `.png` format is supported.
 
 ## Shortcuts
 
