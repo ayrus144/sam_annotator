@@ -1,7 +1,7 @@
 """
 Predicts segmentation masks via SAM model
 for all images in given dataset.
-Saves mask as 8-bit grayscale .PNG
+Saves mask as 8-bit grayscale .JPG
 """
 
 from pathlib import Path
@@ -22,7 +22,15 @@ def make_annotator(weights_path: str, device: str) -> SamAutomaticMaskGenerator:
     t2 = time.perf_counter()
     sam.to(device)
     t3 = time.perf_counter()
-    mask_generator = SamAutomaticMaskGenerator(sam)
+    mask_generator = SamAutomaticMaskGenerator(
+        model=sam,
+        points_per_side=32,
+        pred_iou_thresh=0.86,
+        stability_score_thresh=0.92,
+        crop_n_layers=1,
+        crop_n_points_downscale_factor=2,
+        min_mask_region_area=100, # needs opencv for postprocessing
+    )
     print(f"Load weights: {(t2-t1):.3f}s\nMove to {device}: {(t3-t2):.3f}s")
     return mask_generator
 
@@ -31,19 +39,20 @@ if __name__ == "__main__":
     with open("config.toml", "rb") as f:
         config = tomllib.load(f)
     data_path = Path(config["paths"]["data"])
+    sam_weights = Path(config["paths"]["sam_weights"])
     images_path = data_path / "images"
     assert (
         images_path.exists()
     ), "Data path must contain 'images' folder with all source data images"
     sam_path = data_path / "sam"
     sam_path.mkdir(exist_ok=True)
-    sam = make_annotator(config["paths"]["sam_weights"], config["device"])
+    sam = make_annotator(str(sam_weights), config["device"])
 
     max_masks = 0
 
     img_stems = [path.stem for path in sorted(images_path.iterdir())]
     for stem in tqdm(img_stems):
-        filename = f"{stem}.png"
+        filename = f"{stem}.jpg"
         img_path = images_path / filename
         out_path = sam_path / filename
         img = Image.open(img_path)
