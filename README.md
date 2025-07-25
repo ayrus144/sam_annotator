@@ -51,6 +51,7 @@ conda activate samat
 
 ## Environment setup with requirements.txt
 pip install -r requirements.txt
+pip install torch==2.1.0 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu118 # cuda support
 
 ## Or, Manual environment setup
 ## conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
