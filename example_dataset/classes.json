@@ -1,11 +1,12 @@
 {
     "classes": [
-        { "id": 1, "name": "road", "color": "#FF0000" },
-        { "id": 2, "name": "sidewalk", "color": "#00FF00" },
-        { "id": 3, "name": "human", "color": "#0000FF" },
-        { "id": 4, "name": "car", "color": "#FFFF00" },
-        { "id": 5, "name": "building", "color": "#FF00FF" },
-        { "id": 6, "name": "vegetation", "color": "#00FFFF" },
-        { "id": 7, "name": "obstacle", "color": "#FF8000" }
+        { "id": 1, "name": "Tree/trunk", "color": "#FF0000" },
+        { "id": 2, "name": "Snow", "color": "#00FFFF" },
+        { "id": 3, "name": "Bare_ground/rocks", "color": "#FF8000" },
+        { "id": 4, "name": "Ground_vegetation", "color": "#FF8080" },
+        { "id": 5, "name": "Rejuvenation", "color": "#00FF00" },
+        { "id": 6, "name": "Sky", "color": "#FFFF00" },
+        { "id": 7, "name": "Pole", "color": "#FF00FF" },
+        { "id": 8, "name": "Trees_background", "color": "#0000FF" }
     ]
 }

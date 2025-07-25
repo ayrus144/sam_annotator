@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         self.resize(1000, 1000)
 
         self._workdir = Path(workdir)
-        self._class_dir = self._workdir / "classes.json"
+        self._class_dir = Path(__file__).parent.parent / "example_dataset" / "classes.json"
         self._image_dir = self._workdir / "images"
         self._label_dir = self._workdir / "labels"
         self._sam_dir = self._workdir / "sam"
