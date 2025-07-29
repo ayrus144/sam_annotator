@@ -51,12 +51,9 @@ conda activate samat
 
 ## Environment setup with requirements.txt
 pip install -r requirements.txt
-pip install torch==2.1.0 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu118 # cuda support
-
-## Or, Manual environment setup
-## conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-## pip install git+https://github.com/facebookresearch/segment-anything.git
-## pip install opencv-python pycocotools matplotlib onnxruntime onnx
+pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu118 # cuda support
+## works for both "cuda" and "cpu" devices
+## In future, check if SAM2 works as expected and make changes to requirements file accordingly.
 ```
 
 Example setup (Ubuntu):
@@ -91,18 +88,16 @@ Your data **MUST** follow this structure:
    |   ├── 000001.jpg
    |   ├── 000002.jpg
    |   └── ...
-   └── classes.json
 ```
 
 - `images` contains `.jpg` files you want to label.
 - `labels` contains `.jpg` files with labels (will be automatically created if you have no labels yet).
 - `sam` contains `.jpg` files with SAM annotations (8-bit grayscale product of SAM script from `scripts/` folder).
+
+
+**Class Labels**: 
+- To maintain similarity among labels used for annotation, a common `classes.json` at `example_dataset` folder is used.
 - `classes.json` contains classes description that will be used for labeling.
-
-
-**Hints & Best Practice**: 
-- To maintain similarity among multiple sessions, save a common `classes.json` at `example_dataset` folder and copy it to your required dataset.
-- While creating `classes.json` file, be sure to create independent class labels, especially its corresponding color in hexadecimal.
 
 Example `classes.json`:
 
@@ -118,12 +113,13 @@ Example `classes.json`:
 where:
 
 - `id` field must coincide with number keys on keyboard, so start with 1 (not 0). Any number of classes allowed, but only first 9 have their shortcuts.
-- `name` field is arbitrary and used only for dispaly in GUI
+- `name` field is arbitrary and used only for display in GUI
 - `color` field specifies the color this class would be displayed in GUI and encoded in output label `.jpg`
 
 **Note:** 
 - Specify path to your `data` inside `config.toml`.
 - Image files can have arbitrary names, but should resemble labels and sam names + only `.jpg` format is supported.
+- Path to SAM weights is already specified in `config.toml`.
 
 ## Shortcuts
 
