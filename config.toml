@@ -1,5 +1,3 @@
-device = "cpu" # "cpu" or "cuda"
-
 [paths]
 data = "example_dataset"  # enter path to your dataset here
 sam_weights = "C:/LWF/sam_annotator/assets/sam_vit_h_4b8939.pth"

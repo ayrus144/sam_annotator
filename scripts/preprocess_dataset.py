@@ -15,15 +15,16 @@ import cv2
 from tqdm import tqdm
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 
-# Run pip show SAM-2 & pip install git+https://github.com/facebookresearch/sam2.git if needed
+# In future, try pip install sam2
 # (has compatibility issues when running locally, works only on jupyter notebooks)
 # (see automatic_mask_generator_example.ipynb - taken from facebook)
 # from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 # from sam2.build_sam import build_sam2
 
 
-def make_annotator(weights_path: str, device: str) -> SamAutomaticMaskGenerator:
+def make_annotator(weights_path: str) -> SamAutomaticMaskGenerator:
     model_type = "vit_h"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Loading {model_type} on {device} device")
     t1 = time.perf_counter()
     sam = sam_model_registry[model_type](weights_path)
@@ -38,7 +39,7 @@ def make_annotator(weights_path: str, device: str) -> SamAutomaticMaskGenerator:
     #     config_file="configs/sam2/sam2_hiera_l.yaml",
     #     checkpoint=weights_path,
     #     device = device,
-    #     apply_postprocesssing=False
+    #     apply_postprocessing=False
     # )
     t2 = time.perf_counter()
     sam.to(device)
@@ -50,18 +51,18 @@ def make_annotator(weights_path: str, device: str) -> SamAutomaticMaskGenerator:
         stability_score_thresh=0.92,
         crop_n_layers=1,
         crop_n_points_downscale_factor=2,
-        min_mask_region_area=1000, # needs opencv for postprocessing
+        min_mask_region_area=500, # needs opencv for postprocessing
     )
     # mask_generator = SAM2AutomaticMaskGenerator(
     #     model=sam2,
-    #     points_per_side=32,
+    #     points_per_side=64,
     #     pred_iou_thresh=0.7,
     #     stability_score_thresh=0.92,
     #     stability_score_offset=0.7,
     #     crop_n_layers=1,
     #     box_nms_thresh=0.7,
     #     crop_n_points_downscale_factor=2,
-    #     min_mask_region_area=1000,
+    #     min_mask_region_area=500, # needs opencv for postprocessing
     #     use_m2m=True,
     # )
     print(f"Load weights: {(t2-t1):.3f}s\nMove to {device}: {(t3-t2):.3f}s")
@@ -131,7 +132,7 @@ if __name__ == "__main__":
     ), "Data path must contain 'images' folder with all source data images"
     sam_path = data_path / "sam"
     sam_path.mkdir(exist_ok=True)
-    sam = make_annotator(str(sam_weights), config["device"])
+    sam = make_annotator(str(sam_weights))
 
     max_masks = 0
 
@@ -146,7 +147,7 @@ if __name__ == "__main__":
         masks = sam.generate(img)
         t2 = time.perf_counter()
         sorted_masks = sorted(masks, key=(lambda x: x["area"]), reverse=True)
-        label = np.zeros(sorted_masks[0]["segmentation"].shape, dtype=np.uint8)
+        label = np.zeros(sorted_masks[0]["segmentation"].shape, dtype=np.uint16)
         for i, sm in enumerate(sorted_masks):
             m = sm["segmentation"]
             label[m] = i + 1
