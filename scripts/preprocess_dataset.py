@@ -46,7 +46,7 @@ def make_annotator(weights_path: str) -> SamAutomaticMaskGenerator:
     t3 = time.perf_counter()
     mask_generator = SamAutomaticMaskGenerator(
         model=sam,
-        points_per_side=64,
+        points_per_side=32,
         pred_iou_thresh=0.86,
         stability_score_thresh=0.92,
         crop_n_layers=1,
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     max_masks = 0
 
-    img_stems = [path.stem for path in sorted(images_path.iterdir())]
+    img_stems = [path.stem for path in sorted(images_path.glob("*.jpg"))]
     for stem in tqdm(img_stems):
         filename = f"{stem}.jpg"
         img_path = images_path / filename
@@ -153,6 +153,7 @@ if __name__ == "__main__":
             label[m] = i + 1
         max_masks = max(max_masks, np.max(label))
         new_label = replace_surrounded_masks_opencv(label, 7000)
-        tqdm.write(f"file: {filename} | SAM: {(t2-t1):.3f}s | labels: {np.max(label)} -> {len(np.unique(new_label))}")
+        # tqdm.write(f"file: {filename} | SAM: {(t2-t1):.3f}s | labels: {np.max(label)} -> {len(np.unique(new_label))}")
+        tqdm.write(f"file: {filename} | SAM: {(t2 - t1):.3f}s")
         label_img = Image.fromarray(label, mode="L")
         label_img.save(out_path)
