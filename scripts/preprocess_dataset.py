@@ -147,12 +147,14 @@ if __name__ == "__main__":
         masks = sam.generate(img)
         t2 = time.perf_counter()
         sorted_masks = sorted(masks, key=(lambda x: x["area"]), reverse=True)
-        label = np.zeros(sorted_masks[0]["segmentation"].shape, dtype=np.uint16)
+        label = np.zeros(sorted_masks[0]["segmentation"].shape, dtype=np.uint8)
         for i, sm in enumerate(sorted_masks):
+            if i==255:
+                break
             m = sm["segmentation"]
             label[m] = i + 1
         max_masks = max(max_masks, np.max(label))
-        new_label = replace_surrounded_masks_opencv(label, 7000)
+        # new_label = replace_surrounded_masks_opencv(label, 7000)
         # tqdm.write(f"file: {filename} | SAM: {(t2-t1):.3f}s | labels: {np.max(label)} -> {len(np.unique(new_label))}")
         tqdm.write(f"file: {filename} | SAM: {(t2 - t1):.3f}s")
         label_img = Image.fromarray(label, mode="L")
