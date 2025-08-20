@@ -10,7 +10,7 @@ class BrushCursor(QGraphicsEllipseItem):
         self.setRect(rect)
         self._border_pen = QPen()
         self._border_pen.setColor(Qt.GlobalColor.black)
-        self._border_pen.setWidth(1)
+        self._border_pen.setWidth(15)
         self._fill_brush = QBrush()
         self._fill_brush.setColor(Qt.GlobalColor.transparent)
 
