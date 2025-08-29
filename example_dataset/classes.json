@@ -1,15 +1,15 @@
 {
-    "classes": [
-        { "id": 1, "name": "road", "color": "#000000" },
-        { "id": 2, "name": "bareground_rock", "color": "#808080" },
-        { "id": 3, "name": "ground_vegetation", "color": "#90EE90" },
-        { "id": 4, "name": "rejuvenation", "color": "#006400" },
-        { "id": 5, "name": "tree_trunk", "color": "#A52A2A" },
-        { "id": 6, "name": "trees_background", "color": "#DC143C" },
-	    { "id": 7, "name": "snow", "color": "#FFFFFF" },
-	    { "id": 8, "name": "pole", "color": "#FFA500" },
-	    { "id": 9, "name": "blur_obs", "color": "#0000FF" },
-        { "id": 10, "name": "sky", "color": "#ADD8E6" },
-        { "id": 11, "name": "dead_vegetation", "color": "FF8080" }
-    ]
+  "classes": [
+    { "id": 1, "name": "road", "color": "#7A7A7A" },
+    { "id": 2, "name": "bareground_rock", "color": "#C0C0C0" },
+    { "id": 3, "name": "ground_vegetation", "color": "#32CD32" },
+    { "id": 4, "name": "rejuvenation", "color": "#9ACD32" },
+    { "id": 5, "name": "tree_trunk", "color": "#CD5C5C" },
+    { "id": 6, "name": "trees_background", "color": "#006400" },
+    { "id": 7, "name": "snow", "color": "#E0FFFF" },
+    { "id": 8, "name": "pole", "color": "#FFA500" },
+    { "id": 9, "name": "blur_obs", "color": "#4682B4" },
+    { "id": 10, "name": "sky", "color": "#87CEFA" },
+    { "id": 11, "name": "dead_veg_debris", "color": "#A0522D" }
+  ]
 }
