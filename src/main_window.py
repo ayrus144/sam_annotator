@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import sys
 
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor, QKeyEvent, QCloseEvent, QIcon, QPixmap
@@ -29,7 +30,8 @@ class MainWindow(QMainWindow):
         self.resize(1000, 1000)
 
         self._workdir = Path(workdir)
-        self._class_dir = Path(__file__).parent.parent / "example_dataset" / "classes.json"
+        base_path = Path(sys._MEIPASS) if hasattr(sys, '_MEIPASS') else Path(__file__).parent.parent
+        self._class_dir = base_path / "example_dataset" / "classes.json"
         self._image_dir = self._workdir / "images"
         self._label_dir = self._workdir / "labels"
         self._sam_dir = self._workdir / "sam"
