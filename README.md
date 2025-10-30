@@ -12,7 +12,8 @@ Animation below shows annotation speed in real-time (SAM mask used).
 ## Workflow
 
 After environment setup:
-- Organize your data following [this](#dataset-folder-structure) structure. Don't forget to copy/create/edit `classes.json`.
+- Organize your data following [this](#dataset-folder-structure) structure. 
+- By design `example_dataset/classes.json` is used for the SAM GUI to maintain consistency across usages. So, define the file properly once and forget it :)
 - (optional) Generate SAM masks from images via `scripts/preprocess_dataset.py`. Necessary for `SAM assistance` option.
 ```bash 
 python scripts/preprocess_dataset.py
@@ -23,7 +24,11 @@ python scripts/preprocess_dataset.py
 python __main__.py
 ```
 - Annotate using brush (and/or) SAM assistance (label is saved on sample switch).
-- See **Shortcuts** section for brush and panel controls (ex. changing image sample etc.)
+- See [Shortcuts](#Shortcuts) section for brush and panel controls (ex. changing image sample etc.)
+- (optional) Generate semanticData dataset from saved labels for training class-aware semantic model [finetune-anything](https://github.com/ayrus144/finetune-anything) via `scripts/preprocess_dataset.py`.
+```bash 
+python scripts/postprocess_dataset.py
+```
 
 ## Getting started
 
@@ -46,6 +51,9 @@ Annotation tool itself requires only:
 Example setup (assuming Miniconda/Anaconda installed):
 
 ```bash
+git clone https://github.com/ayrus144/sam_annotator.git
+cd sam_annotator
+
 conda create -n samat python=3.11
 conda activate samat
 
@@ -56,43 +64,58 @@ pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https
 ## In future, check if SAM2 works as expected and make changes to requirements file accordingly.
 ```
 
-Example setup (Ubuntu):
-
-```bash
-git clone https://github.com/Divelix/samat.git
-cd samat
-sudo apt update
-sudo apt install python3.11-venv
-pip3 install virtualenv
-virtualenv venv -p python3.11
-source venv/bin/activate
-python -m pip install -e .
-python .
-```
-
 
 ### Dataset folder structure
 
-Your data **MUST** follow this structure:
+Your input data **MUST** follow this structure:
 ```
 ── my_dataset
-   ├── images
-   |   ├── 000001.jpg
-   |   ├── 000002.jpg
+   ├── images (input)
+   |   ├── 000001.{jpg/png}
+   |   ├── 000002.{jpg/png}
    |   └── ...
-   ├── labels (optional)
-   |   ├── 000001.jpg
-   |   ├── 000002.jpg
+   ├── labels (optional) - previously saved annotations
+   |   ├── 000001.png
+   |   ├── 000002.png
    |   └── ...
-   ├── sam (optional)
-   |   ├── 000001.jpg
-   |   ├── 000002.jpg
-   |   └── ...
+   └── sam (optional) - output of preprocess_dataset.py
+       ├── 000001.png
+       ├── 000002.png
+       └── ...
 ```
 
-- `images` contains `.jpg` files you want to label.
-- `labels` contains `.jpg` files with labels (will be automatically created if you have no labels yet).
-- `sam` contains `.jpg` files with SAM annotations (8-bit grayscale product of SAM script from `scripts/` folder).
+Your output structure may look like this:
+```
+── my_dataset
+   ├── images (input)
+   ├── labels (output) - output of samAnnotator.exe / __main__.py
+   |   ├── 000001.png (updated if already present)
+   |   ├── 000002.png (updated if already present)
+   |   └── ...
+   ├── sam (optional)
+   └── semanticData (extra) - output of postprocess_dataset.py
+       ├── img - images folder split as train and val
+       |   ├── train
+       |   └── val
+       ├── ann - labels formated to (class_id, H, W)
+       |   ├── train
+       |   └── val
+       ├── ann_vis - ann folder visualized as color masks
+       |   ├── train
+       |   └── val
+       └── metainfo.yaml - has list of class_names listed in classes.json
+           Example metainfo.yaml
+           class_names
+           - human
+           - car
+           - road
+           ...
+```
+
+- `images` contains image files of any format you want to label.
+- `labels` contains colored masks files with labels. Automatically created (if no labels yet) and updated real-time (after sample switch).
+- `sam` contains mask files from SAM annotations (8-bit grayscale). Run `scripts/preprocess_dataset.py` to generate this folder.
+- `semanticData` contains all the file/folders required for training the class-aware semantic model with [finetune-anything](https://github.com/ayrus144/finetune-anything). Run `scripts/postprocess_dataset.py` to generate this folder.
 
 
 **Class Labels**: 
@@ -105,7 +128,7 @@ Example `classes.json`:
 {
     "classes": [
         { "id": 1, "name": "human", "color": "#FF0000" },
-        { "id": 2, "name": "car", "color": "#00FF00" },
+        { "id": 2, "name": "car", "color": "#00FF00" }
     ]
 }
 ```
@@ -113,13 +136,56 @@ Example `classes.json`:
 where:
 
 - `id` field must coincide with number keys on keyboard, so start with 1 (not 0). Any number of classes allowed, but only first 9 have their shortcuts.
-- `name` field is arbitrary and used only for display in GUI
-- `color` field specifies the color this class would be displayed in GUI and encoded in output label `.jpg`
+- `name` field is arbitrary and used only for display in GUI.
+- `color` field specifies the hexadecimal-color this class would be displayed in GUI.
 
 **Note:** 
 - Specify path to your `data` inside `config.toml`.
-- Image files can have arbitrary names, but should resemble labels and sam names + only `.jpg` format is supported.
+- Image files can have any valid format. But all output files are saved as .png files to avoid compression loss.
 - Path to SAM weights is already specified in `config.toml`.
+
+## Future Ideas
+These are some future ideas that can be implemented to improve the labels:
+- Improve mask label quality with existing masks labels. For each object (human, car, road) in the mask, img pair:
+  - Sample k random points from the object's mask and save as np.array in point_coords.
+  - Re-run the SAM model on the img with sampled points as point_prompt. 
+  - Use sam.set_image(img) and sam.predict(point_coords, point_labels=np.ones(k)).
+- It is important to annotate masks for all images consistently when using GUI, especially to use the masks for training a model. 
+  - For example, if image 1 (with human, car and road), image 2 (with human and road) and image 3 (with car only), and you intend to train a custom model only for human and car, then:
+```
+ANNOTATION 1 - Incorrect 
+── label 1 (corresponds to image 1)
+   ├── human mask
+   └── road mask
+── label 2 (corresponds to image 2)
+   └── road mask
+── label 3 (corresponds to image 3)
+   └── car mask
+Incorrect because car mask is missing in label 1 and human mask is missing in label 2. 
+If a model was trained over this data, the model will have difficult time because
+MODEL is able to see    --->    But is learning
+    image 1                         image 1
+    - human                         - human
+    - car                           - NO car (mask missing)
+    image 2                         image 2
+    - human                         - NO human (mask missing)
+    image 3                         image 3
+    - car                           - car
+Presence of road mask is not the issue.
+
+ANNOTATION 2 - Correct
+── label 1 (corresponds to image 1)
+   ├── human mask
+   ├── car mask
+── label 2 (corresponds to image 2)
+   ├── human mask
+── label 3 (corresponds to image 3)
+   └── car mask
+Correct because all labels have masks of object we are interested in. Absence of road masks is not an issue. 
+```
+- Given you have multiple images from same location, ideally masks should overlap for same objects, so:
+  - For each object in the image, calculate the IoU (Intersection over Union) with a reference.
+  - Retain only those masks that have object IoU's greater than a defined threshold.
 
 ## Shortcuts
 
