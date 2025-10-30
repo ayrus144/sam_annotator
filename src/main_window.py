@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self._label_dir = self._workdir / "labels"
         self._sam_dir = self._workdir / "sam"
         self._label_dir.mkdir(exist_ok=True)
-        self._image_stems = [path.stem for path in sorted(self._image_dir.iterdir())]
+        self._image_info = [(path.stem, path.suffix) for path in sorted(self._image_dir.iterdir())]
         with open(self._class_dir, "r") as f:
             self._classes = json.loads("".join(f.readlines()))["classes"]
         ids = [c["id"] for c in self._classes]
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         ds_group = QGroupBox(self.tr("Dataset"))
 
         self.ds_label = QLabel()
-        self.ds_label.setText("Sample: 000000.jpg")
+        self.ds_label.setText("Sample: 000000")
 
         ds_vlay = QVBoxLayout(ds_group)
         ds_vlay.addWidget(self.ds_label)
@@ -182,15 +182,15 @@ class MainWindow(QMainWindow):
         self._graphics_view.set_brush_color(QColor(color))
 
     def save_current_label(self):
-        curr_label_path = self._label_dir / f"{self._image_stems[self._curr_id]}.jpg"
+        curr_label_path = self._label_dir / f"{self._image_info[self._curr_id][0]}.png"
         self._graphics_view.save_label_to(curr_label_path)
 
     def _load_sample_by_id(self, id: int):
         self._curr_id = id
-        name = f"{self._image_stems[self._curr_id]}.jpg"
-        image_path = self._image_dir / name
-        label_path = self._label_dir / name
-        sam_path = self._sam_dir / name
+        name, suffix = self._image_info[self._curr_id]
+        image_path = self._image_dir / f"{name}{suffix}"
+        label_path = self._label_dir / f"{name}.png"
+        sam_path = self._sam_dir / f"{name}.png"
         self._graphics_view.load_sample(image_path, label_path, sam_path)
         self.ds_label.setText(f"Sample: {name}")
 
@@ -206,7 +206,7 @@ class MainWindow(QMainWindow):
         if step == 0:
             return
         self.save_current_label()
-        max_id = len(self._image_stems) - 1
+        max_id = len(self._image_info) - 1
         corner_case_id = 0 if step < 0 else max_id
         new_id = self._curr_id + step
         new_id = new_id if new_id in range(max_id + 1) else corner_case_id

@@ -1,7 +1,7 @@
 """
 Predicts segmentation masks via SAM model
 for all images in given dataset.
-Saves mask as 8-bit grayscale .JPG
+Saves mask as 8-bit grayscale .PNG
 """
 
 from pathlib import Path
@@ -136,11 +136,12 @@ if __name__ == "__main__":
 
     max_masks = 0
 
-    img_stems = [path.stem for path in sorted(images_path.glob("*.jpg"))]
-    for stem in tqdm(img_stems):
-        filename = f"{stem}.jpg"
-        img_path = images_path / filename
-        out_path = sam_path / filename
+    valid_suffix = ['.png', '.jpg']
+    img_info = [(path.stem, path.suffix) for path in sorted(images_path.iterdir()) if path.stem in valid_suffix]
+    for stem, suffix in tqdm(img_info):
+        img_filename = f"{stem}{suffix}"
+        img_path = images_path / img_filename
+        out_path = sam_path / f"{stem}.png"
         img = Image.open(img_path)
         img = np.array(img)
         t1 = time.perf_counter()
@@ -156,6 +157,6 @@ if __name__ == "__main__":
         max_masks = max(max_masks, np.max(label))
         # new_label = replace_surrounded_masks_opencv(label, 7000)
         # tqdm.write(f"file: {filename} | SAM: {(t2-t1):.3f}s | labels: {np.max(label)} -> {len(np.unique(new_label))}")
-        tqdm.write(f"file: {filename} | SAM: {(t2 - t1):.3f}s")
+        tqdm.write(f"file: {img_filename} | SAM: {(t2 - t1):.3f}s")
         label_img = Image.fromarray(label, mode="L")
         label_img.save(out_path)
